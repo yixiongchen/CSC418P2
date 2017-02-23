@@ -212,6 +212,31 @@ void RenderSurfaceGrid(void)
  //       Don't forget to specify the normal at each vertex. Otherwise
  //       your surface won't be properly illuminated
  /////////////////////////////////////////////////////////////////////////
+  int i, j;
+
+  float r = 0.9;
+  float g = 0.84;
+  float b = 0.4;
+  for(i=0; i<GRID_RESOLVE-1; i++){
+    for(j=0; j<GRID_RESOLVE-1; j++){
+      glBegin(GL_QUADS); // 2x2 pixels
+      glColor3f(r, g, b);
+      glVertex3f(GroundXYZ[i][j][0], GroundXYZ[i][j][1],GroundXYZ[i][j][2]);
+      glVertex3f(GroundXYZ[i+1][j][0], GroundXYZ[i+1][j][1],GroundXYZ[i+1][j][2]);
+      glVertex3f(GroundXYZ[i+1][j+1][0], GroundXYZ[i+1][j+1][1], GroundXYZ[i+1][j+1][2]);
+      glVertex3f(GroundXYZ[i][j+1][0], GroundXYZ[i][j+1][1], GroundXYZ[i][j+1][2]);
+      glEnd();
+    }
+    r -= 0.01;
+    g -= 0.01;
+    b -= 0.01;
+  }
+ 
+
+
+
+
+ 
 }
 
 void MakeSurfaceGrid(void)
@@ -247,12 +272,17 @@ void MakeSurfaceGrid(void)
  // Assign surface heights
  side=15;				// Width of the surface - X and Y coordinates
 					// will have values in [-side/2, side/2]
+
+
  for (int i=0; i<GRID_RESOLVE; i++)
   for (int j=0; j<GRID_RESOLVE; j++)
   {
+   float distance = sqrtf(powf(i -12, 2) + powf(j - 12 ,2));
+   float height = 2 - (distance / sqrtf(powf(12, 2) + powf(12, 2)) * 2)*0.7;
    GroundXYZ[i][j][0]=(-side*.5)+(i*(side/GRID_RESOLVE));
    GroundXYZ[i][j][1]=(-side*.5)+(j*(side/GRID_RESOLVE));
-   GroundXYZ[i][j][2]=0;	// <----- HERE you must define surface height in some smart way!
+   GroundXYZ[i][j][2]= height;
+  
   }
 
  // Compute normals at each vertex
@@ -845,7 +875,12 @@ void setupUI()
     //        global_Z must be in [-180, 180]
     //        global_scale must be in [0, 20]
     ///////////////////////////////////////////////////////////
-
+    /*
+    GLUI_Spinner *global_spinner
+          = glui->add_spinner("global_rot", GLUI_SPINNER_FLOAT, &global_Z);
+      global_spinner->set_speed(3.0);
+      global_spinner->set_float_limits(-180, 180, GLUI_LIMIT_CLAMP);
+    */
     ImGui::SetWindowFocus();
         ImGui::ColorEdit3("clear color", (float*)&clear_color);
 
@@ -908,6 +943,7 @@ void WindowDisplay(void)
     // Setup the model-view transformation matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glRotatef(global_Z, 0.0f, 0.0f, 1.0f);
 
     glClearDepth(1);
     glEnable(GL_DEPTH_TEST);    // Enable depth testing
