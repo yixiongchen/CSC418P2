@@ -285,9 +285,7 @@ void MakeSurfaceGrid(void)
 
    GroundXYZ[i][j][0]=(-side*.5)+(i*(side/GRID_RESOLVE));
    GroundXYZ[i][j][1]=(-side*.5)+(j*(side/GRID_RESOLVE));
-   GroundXYZ[i][j][2]= cos(i/2)/4 - sin(j/2)/4;
-   
-
+   GroundXYZ[i][j][2]= cos(powf(i,2)/6)/4 -sin(j/4);
   
   }
 
