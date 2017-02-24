@@ -285,7 +285,7 @@ void MakeSurfaceGrid(void)
 
    GroundXYZ[i][j][0]=(-side*.5)+(i*(side/GRID_RESOLVE));
    GroundXYZ[i][j][1]=(-side*.5)+(j*(side/GRID_RESOLVE));
-   GroundXYZ[i][j][2]= cos(powf(i,2)/6)/4 -sin(j/4);
+   GroundXYZ[i][j][2]=  (sin(j)/4) + (cos(i)/4);
   
   }
 
@@ -907,14 +907,12 @@ void setupUI()
     //        global_Z must be in [-180, 180]
     //        global_scale must be in [0, 20]
     ///////////////////////////////////////////////////////////
-    /*
-    GLUI_Spinner *global_spinner
-          = glui->add_spinner("global_rot", GLUI_SPINNER_FLOAT, &global_Z);
-      global_spinner->set_speed(3.0);
-      global_spinner->set_float_limits(-180, 180, GLUI_LIMIT_CLAMP);
-    */
+    
+   
+    
     ImGui::SetWindowFocus();
         ImGui::ColorEdit3("clear color", (float*)&clear_color);
+        ImGui::SliderFloat("Rotate", &global_Z, -180.0f, 180.0f);
 
     // Add "Quit" button
     if(ImGui::Button("Quit")) {
@@ -975,7 +973,8 @@ void WindowDisplay(void)
     // Setup the model-view transformation matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(global_Z, 0.0f, 0.0f, 1.0f);
+
+   
 
     glClearDepth(1);
     glEnable(GL_DEPTH_TEST);    // Enable depth testing
