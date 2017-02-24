@@ -221,15 +221,20 @@ void RenderSurfaceGrid(void)
     for(j=0; j<GRID_RESOLVE-1; j++){
       glBegin(GL_QUADS); // 2x2 pixels
       glColor3f(r, g, b);
+      glNormal3f(GroundNormals[i][j][0],GroundNormals[i][j][1],GroundNormals[i][j][2]);
       glVertex3f(GroundXYZ[i][j][0], GroundXYZ[i][j][1],GroundXYZ[i][j][2]);
+
+      glNormal3f(GroundNormals[i+1][j][0],GroundNormals[i+1][j][1],GroundNormals[i+1][j][2]);
       glVertex3f(GroundXYZ[i+1][j][0], GroundXYZ[i+1][j][1],GroundXYZ[i+1][j][2]);
+
+      glNormal3f(GroundNormals[i+1][j+1][0],GroundNormals[i+1][j+1][1],GroundNormals[i+1][j+1][2]);
       glVertex3f(GroundXYZ[i+1][j+1][0], GroundXYZ[i+1][j+1][1], GroundXYZ[i+1][j+1][2]);
+
+      glNormal3f(GroundNormals[i][j+1][0],GroundNormals[i][j+1][1],GroundNormals[i][j+1][2]);
       glVertex3f(GroundXYZ[i][j+1][0], GroundXYZ[i][j+1][1], GroundXYZ[i][j+1][2]);
       glEnd();
     }
-    r -= 0.01;
-    g -= 0.01;
-    b -= 0.01;
+
   }
  
 
@@ -277,11 +282,12 @@ void MakeSurfaceGrid(void)
  for (int i=0; i<GRID_RESOLVE; i++)
   for (int j=0; j<GRID_RESOLVE; j++)
   {
-   float distance = sqrtf(powf(i -12, 2) + powf(j - 12 ,2));
-   float height = 2 - (distance / sqrtf(powf(12, 2) + powf(12, 2)) * 2)*0.7;
+
    GroundXYZ[i][j][0]=(-side*.5)+(i*(side/GRID_RESOLVE));
    GroundXYZ[i][j][1]=(-side*.5)+(j*(side/GRID_RESOLVE));
-   GroundXYZ[i][j][2]= height;
+   GroundXYZ[i][j][2]= cos(i/2)/4 - sin(j/2)/4;
+   
+
   
   }
 
@@ -295,15 +301,43 @@ void MakeSurfaceGrid(void)
  for (int i=0; i<GRID_RESOLVE; i++)
   for (int j=0; j<GRID_RESOLVE; j++)
   {
+    int increment_i, increment_j;
+    increment_i = 1;
+    increment_j = 1;
    // Obtain two vectors on the surface the point at GroundXYZ[i][j][] is located
+
+    // i reach the border
+    if( i == GRID_RESOLVE -1){
+      increment_i = -1;
+    }
+    // j reach the border
+    if( j == GRID_RESOLVE-1){
+      increment_j = -1;
+    }
+
+    //compute vector v 
+    GLfloat  v_x = GroundXYZ[i][j][0] - GroundXYZ[i+increment_i][j][0];
+    GLfloat  v_y = GroundXYZ[i][j][1] - GroundXYZ[i+increment_i][j][1];
+    GLfloat  v_z = GroundXYZ[i][j][2] - GroundXYZ[i+increment_i][j][2];
+    //compute vector w
+    GLfloat w_x = GroundXYZ[i][j][0] - GroundXYZ[i+increment_i][j+increment_j][0];
+    GLfloat w_y = GroundXYZ[i][j][1] - GroundXYZ[i+increment_i][j +increment_j][1];
+    GLfloat w_z = GroundXYZ[i][j][2] - GroundXYZ[i+increment_i][j +increment_j][2];
+
+    vx = v_x;
+    vy = v_y;
+    vz = v_z;
+    wx = w_x;
+    wy = w_y;
+    wz = w_z;
 
    // Then compute the normal
    computeNormal(&vx,&vy,&vz,wx,wy,wz);
 
    // And store it...
-   GroundNormals[i][j][0]=0;    // <----- HEY!
-   GroundNormals[i][j][1]=0;    // <----- REPLACE THESE COMPONENTS with the correct
-   GroundNormals[i][j][2]=1;    // <----- normal for your surface!
+   GroundNormals[i][j][0]=vx;    // <----- HEY!
+   GroundNormals[i][j][1]=vy;    // <----- REPLACE THESE COMPONENTS with the correct
+   GroundNormals[i][j][2]=vz;    // <----- normal for your surface!
   }
 }
 
