@@ -85,6 +85,8 @@ GLfloat GroundXYZ[GRID_RESOLVE][GRID_RESOLVE][3];	// Array to store ground surfa
 GLfloat GroundNormals[GRID_RESOLVE][GRID_RESOLVE][3];   // Array to hold normal vectors at vertices (will use normal to triangle
                                                         // defined by the vertices at [i][j], [i+1][j], and [i][j+1]
 ImVec4 clear_color = ImColor(0.1f,0.1f,0.1f,1.0f);
+int check_x[GRID_RESOLVE];  // record whether position x has been occpuied by a plant
+int check_y[GRID_RESOLVE];  // record whether position y has been occpuied by a plant
 
 // Texture data
 int textures_on;				// Flag to indicate texturing should be enabled for leafs/flowers
@@ -285,8 +287,9 @@ void MakeSurfaceGrid(void)
    GroundXYZ[i][j][0]=(-side*.5)+(i*(side/GRID_RESOLVE));
    GroundXYZ[i][j][1]=(-side*.5)+(j*(side/GRID_RESOLVE));
    GroundXYZ[i][j][2]=  (sin(j)/4) + (cos(i)/4);
-  
   }
+
+
 
  // Compute normals at each vertex
  // Remember we talked about how to compute the normal for a triangle in lecture. You
@@ -336,6 +339,12 @@ void MakeSurfaceGrid(void)
    GroundNormals[i][j][1]=vy;    // <----- REPLACE THESE COMPONENTS with the correct
    GroundNormals[i][j][2]=vz;    // <----- normal for your surface!
   }
+
+  //intialize check_x and check_y
+  for (int i=0; i<GRID_RESOLVE; i++){
+    check_x[i] = 0;
+    check_y[i] = 0;
+  }
 }
 
 void AnimatedRenderPlant(void)
@@ -369,10 +378,42 @@ void RenderPlant(struct PlantNode *p)
  //       something at the end of these last-level stems,
  //       else your plant will look 'dried up'.
  ////////////////////////////////////////////////////////////
-  
- 
 
  if (p==NULL) return;		// Avoid crash if called with empty node
+
+
+ //left node
+ RenderPlant(p->left);
+ //parent node
+ if(p->type == a || p->type == b){
+  //x, z angle
+
+
+  //scale vector
+
+
+  StemSection();
+ }
+ if(p->type == c){
+  //x, z angle
+
+
+  //scale vector
+
+  
+  LeafSection();
+ }
+ if(p->type == d){
+  //x, z angle
+
+
+  //scale vector
+
+  
+  FlowerSection()
+ }
+ //right node
+ RenderPlant(p->right);
 }
 
 void StemSection(void)
@@ -451,6 +492,17 @@ void LeafSection(void)
  ///////////////////////////////////////////////////////////
  // DO YOUR DRAWING WORK HERE!!!!
  ///////////////////////////////////////////////////////////
+         glBegin(GL_TRIANGLES); 
+          glNormal3f(-0.1, 0, 0.25); 
+          glVertex3f(0, 0, 0); 
+          glVertex3f(0.25, 0.25, 0.1); 
+          glVertex3f(0, 0.5, 0); 
+
+          glNormal3f(0.1, 0, 0.25); 
+          glVertex3f(0, 0, 0); 
+          glVertex3f(0, 0.5, 0); 
+          glVertex3f(-0.25, 0.25, 0.1); 
+        glEnd(); 
 
  // Disable texture mapping
  if (textures_on)
@@ -649,7 +701,49 @@ void GenerateRecursivePlant(struct PlantNode *p, int level)
    //        nodes to the plant tree. This is implemented below
    //        for 'b' type nodes, and you can look at that code
    //        to give you an idea how the process works.
-   ///////////////////////////////////////////////////////////// 
+   /////////////////////////////////////////////////////////////
+
+    // Generate a single node for left 
+    q=(struct PlantNode *)calloc(1,sizeof(struct PlantNode));
+    q->x_ang = drand48()*X_angle;
+    q->z_ang = drand48()*Z_angle;
+    q->scl = scale_mult;
+    q->left = NULL;
+    q->right = NULL;
+    // Generate a single node for right
+    r=(struct PlantNode *)calloc(1,sizeof(struct PlantNode));
+    r->x_ang = drand48()*X_angle;
+    r->z_ang = drand48()*Z_angle;
+    r->scl = scale_mult;
+    r->left = NULL;
+    r->right = NULL;
+
+    if(dice<=Paaa){
+      // Selected rule a -> aa
+      q->type = 'a';
+      r->type = 'a';
+    }
+    else if(dice <= (Paaa + Paab)){
+      // Selected rule a -> ab
+      q->type = 'a';
+      r->type = 'b';
+    }
+    else if(dice <= (Paaa+Paab+Paac)){
+       // Selected rule a -> ac
+      q->type = 'a';
+      r->type = 'c';
+    }
+    else if(dice <= (Paaa+Paab+Paac+Paad)){
+      // Selected rule a -> ad
+      q->type = 'a';
+      r->type = 'd';
+    }
+    else{
+      // Selected rule a -> cd
+      q->type = 'c';
+      q->type = 'd';
+    }
+
   }
   else if (p->type=='b')
   {
@@ -662,12 +756,12 @@ void GenerateRecursivePlant(struct PlantNode *p, int level)
     r->left=NULL;
     r->right=NULL;
 
-    if (dice<=Pba)
+    if (dice<=Pba) 
       {
-	// Selected rule b -> a
+      // Selected rule b -> a
         r->type='a';
       }
-    else if (dice<=(Pba+Pbc))
+    else if (dice<=(Pba+Pbc)) 
       {
         // Selected rule b -> c
         r->type='c';
@@ -800,6 +894,24 @@ int main(int argc, char** argv)
     //        the corresponding location in the surface grid.
     //////////////////////////////////////////////////////////////
 
+    // a random coordinate for x
+    int rand_x = rand() % GRID_RESOLVE;
+    // a random coordinate for y
+    int rand_y = rand() % GRID_RESOLVE;
+    
+    //check x, y are not used before
+    while(check_x[rand_x] == 1 && check_y[rand_y] == 1){
+        rand_x = rand() % GRID_RESOLVE;
+        rand_y = rand() % GRID_RESOLVE;
+    }
+  
+    ForestXYZ[i][0]=GroundXYZ[rand_x][rand_y][0];
+    ForestXYZ[i][1]=GroundXYZ[rand_x][rand_y][1];
+    ForestXYZ[i][2]=GroundXYZ[rand_x][rand_y][2];
+    check_x[rand_x] = 1;
+    check_y[rand_y] = 1;
+
+
     // Intialize global transformation variables and GLUI    
     global_Z=0;
     global_scale=15;
@@ -908,8 +1020,6 @@ void setupUI()
     //        global_Z must be in [-180, 180]
     //        global_scale must be in [0, 20]
     ///////////////////////////////////////////////////////////
-    
-   
     
     ImGui::SetWindowFocus();
         ImGui::ColorEdit3("clear color", (float*)&clear_color);
