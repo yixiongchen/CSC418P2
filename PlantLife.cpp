@@ -240,7 +240,6 @@ void RenderSurfaceGrid(void)
 
 
 
-
  
 }
 
@@ -370,6 +369,8 @@ void RenderPlant(struct PlantNode *p)
  //       something at the end of these last-level stems,
  //       else your plant will look 'dried up'.
  ////////////////////////////////////////////////////////////
+  
+ 
 
  if (p==NULL) return;		// Avoid crash if called with empty node
 }
@@ -380,7 +381,7 @@ void StemSection(void)
   // I'm giving you this function already so you can at least see
   // the 'skeleton' of your plant to help debug the L-system.
 
-  // Create a quadrics object to make the stem
+  // Create a quadrics object to make the stem 
   GLUquadric *quadObject;
   quadObject=gluNewQuadric();
 
@@ -912,7 +913,10 @@ void setupUI()
     
     ImGui::SetWindowFocus();
         ImGui::ColorEdit3("clear color", (float*)&clear_color);
+        //global rotation around Z
         ImGui::SliderFloat("Rotate", &global_Z, -180.0f, 180.0f);
+        //global scaling
+        ImGui::SliderFloat("Scale", &global_scale, 0.0f, 20.0f);
 
     // Add "Quit" button
     if(ImGui::Button("Quit")) {
