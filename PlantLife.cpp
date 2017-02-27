@@ -111,6 +111,7 @@ GLint n_levels;       // Number of levels of branching in the plant
 GLint n_plants;	      // Number of plants in a plant forest in [1,MAX_PLANTS]
 
 // Transition probabilities for the L-system specification
+GLfloat Paaa;
 GLfloat Paab;
 GLfloat Paac;
 GLfloat Paad;
@@ -385,7 +386,7 @@ void RenderPlant(struct PlantNode *p)
  //left node
  RenderPlant(p->left);
  //parent node
- if(p->type == a || p->type == b){
+ if(p->type =='a' || p->type == 'b'){
   //x, z angle
 
 
@@ -394,7 +395,7 @@ void RenderPlant(struct PlantNode *p)
 
   StemSection();
  }
- if(p->type == c){
+ if(p->type == 'c'){
   //x, z angle
 
 
@@ -403,14 +404,14 @@ void RenderPlant(struct PlantNode *p)
   
   LeafSection();
  }
- if(p->type == d){
+ if(p->type == 'd'){
   //x, z angle
 
 
   //scale vector
 
   
-  FlowerSection()
+  FlowerSection();
  }
  //right node
  RenderPlant(p->right);
@@ -885,7 +886,7 @@ int main(int argc, char** argv)
     MakeSurfaceGrid();
 
     // Make a plant forest!
-    for (int i=0;i<n_plants;i++)
+    for (int i=0;i<n_plants;i++){
      PlantForest[i]=MakePlant();
 
     //////////////////////////////////////////////////////////////
@@ -894,22 +895,23 @@ int main(int argc, char** argv)
     //        the corresponding location in the surface grid.
     //////////////////////////////////////////////////////////////
 
-    // a random coordinate for x
-    int rand_x = rand() % GRID_RESOLVE;
-    // a random coordinate for y
-    int rand_y = rand() % GRID_RESOLVE;
+      // a random coordinate for x
+      int rand_x = rand() % GRID_RESOLVE;
+      // a random coordinate for y
+      int rand_y = rand() % GRID_RESOLVE;
+      
+      //check x, y are not used before
+      while(check_x[rand_x] == 1 && check_y[rand_y] == 1){
+          rand_x = rand() % GRID_RESOLVE;
+          rand_y = rand() % GRID_RESOLVE;
+      }
     
-    //check x, y are not used before
-    while(check_x[rand_x] == 1 && check_y[rand_y] == 1){
-        rand_x = rand() % GRID_RESOLVE;
-        rand_y = rand() % GRID_RESOLVE;
+      ForestXYZ[i][0]=GroundXYZ[rand_x][rand_y][0];
+      ForestXYZ[i][1]=GroundXYZ[rand_x][rand_y][1];
+      ForestXYZ[i][2]=GroundXYZ[rand_x][rand_y][2];
+      check_x[rand_x] = 1;
+      check_y[rand_y] = 1;
     }
-  
-    ForestXYZ[i][0]=GroundXYZ[rand_x][rand_y][0];
-    ForestXYZ[i][1]=GroundXYZ[rand_x][rand_y][1];
-    ForestXYZ[i][2]=GroundXYZ[rand_x][rand_y][2];
-    check_x[rand_x] = 1;
-    check_y[rand_y] = 1;
 
 
     // Intialize global transformation variables and GLUI    
