@@ -144,6 +144,7 @@ void PrintPlant(struct PlantNode *p);
 void printNodeRecursive(struct PlantNode *p, int lev, int tgt);
 void RenderPlant(struct PlantNode *p);
 void StemSection();
+void LeafStem();
 void LeafSection();
 void FlowerSection();
 void AnimatedRenderPlant(void);
@@ -317,13 +318,13 @@ void MakeSurfaceGrid(void)
     }
 
     //compute vector v 
-    GLfloat  v_x = GroundXYZ[i][j][0] - GroundXYZ[i+increment_i][j][0];
-    GLfloat  v_y = GroundXYZ[i][j][1] - GroundXYZ[i+increment_i][j][1];
-    GLfloat  v_z = GroundXYZ[i][j][2] - GroundXYZ[i+increment_i][j][2];
+    GLfloat  v_x = GroundXYZ[i+increment_i][j][0]- GroundXYZ[i][j][0];
+    GLfloat  v_y = GroundXYZ[i+increment_i][j][1]- GroundXYZ[i][j][1];
+    GLfloat  v_z = GroundXYZ[i+increment_i][j][2]- GroundXYZ[i][j][2];
     //compute vector w
-    GLfloat w_x = GroundXYZ[i][j][0] - GroundXYZ[i+increment_i][j+increment_j][0];
-    GLfloat w_y = GroundXYZ[i][j][1] - GroundXYZ[i+increment_i][j +increment_j][1];
-    GLfloat w_z = GroundXYZ[i][j][2] - GroundXYZ[i+increment_i][j +increment_j][2];
+    GLfloat w_x = GroundXYZ[i+increment_i][j+increment_j][0] - GroundXYZ[i][j][0];
+    GLfloat w_y = GroundXYZ[i+increment_i][j +increment_j][1]- GroundXYZ[i][j][1];
+    GLfloat w_z = GroundXYZ[i+increment_i][j +increment_j][2]- GroundXYZ[i][j][2];
 
     vx = v_x;
     vy = v_y;
@@ -382,41 +383,40 @@ void RenderPlant(struct PlantNode *p)
 
  if (p==NULL) return;		// Avoid crash if called with empty node
 
-
- //left node
+ //left children node
  RenderPlant(p->left);
+
  //parent node
  if(p->type =='a' || p->type == 'b'){
   //x, z angle
- 
-
+  glRotatef(p->z_ang, 0, 0, 1);
+  glRotatef(p->x_ang, 1, 0, 0);
   //scale vector
-
-
+  glScalef(p->scl, p->scl, p->scl);
   StemSection();
-  //translate;
-
+  glTranslatef(0, 0, 1);
  }
+
  if(p->type == 'c'){
   //x, z angle
-
+  glRotatef(p->z_ang, 0, 0, 1);
+  glRotatef(p->x_ang, 1, 0, 0);
 
   //scale vector
-
-  
+  glScalef(p->scl, p->scl, p->scl);
   LeafSection();
  }
 
  if(p->type == 'd'){
   //x, z angle
-
+  glRotatef(p->z_ang, 0, 0, 1);
+  glRotatef(p->x_ang, 1, 0, 0);
 
   //scale vector
-
-  
+  glScalef(p->scl, p->scl, p->scl);
   FlowerSection();
  }
- //right node
+ //right children node
  RenderPlant(p->right);
 }
 
@@ -441,9 +441,9 @@ void LeafSection(void)
  // Draws a single leaf, along the current local Z axis
  // Note that we draw a little stem before the actual leaf.
  glColor3f(.25,1,.1);
- StemSection();
+ LeafStem();
  // Perhaps you should translate now? :)
-
+ glTranslatef(0,0,0.5);
  ////////////////////////////////////////////////////////////
  // TO DO: Draw your own leaf design.
  //        It should be aligned with the current Z
@@ -496,18 +496,79 @@ void LeafSection(void)
  ///////////////////////////////////////////////////////////
  // DO YOUR DRAWING WORK HERE!!!!
  ///////////////////////////////////////////////////////////
-   glBegin(GL_TRIANGLES); 
-    glNormal3f(-0.1, 0, 0.25); 
-    glVertex3f(0, 0, 0); 
-    glVertex3f(0.25, 0.25, 0.1); 
-    glVertex3f(0, 0.5, 0); 
 
-    glNormal3f(0.1, 0, 0.25); 
-    glVertex3f(0, 0, 0); 
-    glVertex3f(0, 0.5, 0); 
-    glVertex3f(-0.25, 0.25, 0.1); 
+ //compute normal for each vertex
+ GL_FLOAT leafvertex[7][3];
+ GL_FLOAT leafnormal[7][3];
+ double vx,vy,vz,wx,wy,wz;
+ int flag;
+ //vertex 0
+ leafvertex[0][0] = -0.25;
+ leafvertex[0][1] = 0;
+ leafvertex[0][2] = 0;
+ //vertex 1
+ leafvertex[0][0] = -0.3;
+ leafvertex[0][1] = 0;
+ leafvertex[0][2] = 0.3;
+  //vertex 2
+ leafvertex[0][0] = -0.2;
+ leafvertex[0][1] = 0;
+ leafvertex[0][2] = 0.2;
+  //vertex 3
+ leafvertex[0][0] = 0;
+ leafvertex[0][1] = 0;
+ leafvertex[0][2] = 0.55;
+  //vertex 4
+ leafvertex[0][0] = 0.2;
+ leafvertex[0][1] = 0;
+ leafvertex[0][2] = 0.2;
+  //vertex 5
+ leafvertex[0][0] = 0.3;
+ leafvertex[0][1] = 0;
+ leafvertex[0][2] = 0.3;
+  //vertex 6
+ leafvertex[0][0] = -0.25;
+ leafvertex[0][1] = 0;
+ leafvertex[0][2] = 0;
+
+ flag = 0;
+ for(int i=0; i<7; i++){
+  if( i == 0){
+    flag = 7;
+  }
+  if( i == 6){
+    flag = -7;
+  }
+  wx = leafvertex[i-1+flag][0] - leafvertex[i][0];
+  wy = leafvertex[i-1+flag][0] - leafvertex[i][0];
+  wz = leafvertex[i-1+flag][0] - leafvertex[i][0];
+  vx = leafvertex[i+1+flag][0] - leafvertex[i][0];
+  vy = leafvertex[i+1+flag][0] - leafvertex[i][0];
+  vz = leafvertex[i+1+flag][0] - leafvertex[i][0];
+  computeNormal(&vx,&vy,&vz,wx,wy,wz);
+  leafnormal[i][0]= vx;
+  leafnormal[i][1]= vy;
+  leafnormal[i][2]= vz;
+ }
+   //draw leaf and specify normals
+   glBegin(GL_TRIANGLES); 
+    glNormal3f(leafnormal[0][0],leafnormal[0][1],leafnormal[0][2]); 
+    glVertex3f(-0.25, 0, 0); 
+    glNormal3f(leafnormal[1][0],leafnormal[1][1],leafnormal[1][2]);
+    glVertex3f(-0.3, 0, 0.3); 
+    glNormal3f(leafnormal[2][0],leafnormal[2][1],leafnormal[2][2]);
+    glVertex3f(-0.2, 0, 0.2); 
+    glNormal3f(leafnormal[3][0],leafnormal[3][1],leafnormal[3][2]);
+    glVertex3f(0, 0, 0.55);
+    glNormal3f(leafnormal[4][0],leafnormal[4][1],leafnormal[4][2]);
+    glVertex3f(0.2, 0, 0.2);
+    glNormal3f(leafnormal[5][0],leafnormal[5][1],leafnormal[5][2]);
+    glVertex3f(0.3, 0, 0.3);
+    glNormal3f(leafnormal[6][0],leafnormal[6][1],leafnormal[6][2]);
+    glVertex3f(0.25, 0, 0);
   glEnd(); 
 
+  
  // Disable texture mapping
  if (textures_on)
  {
@@ -745,7 +806,7 @@ void GenerateRecursivePlant(struct PlantNode *p, int level)
     else{
       // Selected rule a -> cd
       q->type = 'c';
-      q->type = 'd';
+      r->type = 'd';
     }
 
   }
@@ -804,7 +865,7 @@ int main(int argc, char** argv)
 
     // Process program arguments
     if(argc != 15) {
-        printf("Usage: PlantLife n_plants n_levels X_angle Z_angle scale_mult Paab Paac Paad Pacd Pba Pbc Pbd width height\n");
+        printf("Usage: PlantLife n_plants n_levels X_angle Z_angle scale_mult Paaa Paab Paac Paad Pacd Pba Pbc Pbd width height\n");
         exit(1);
     } else {
         n_plants=atoi(argv[1]);
@@ -812,15 +873,16 @@ int main(int argc, char** argv)
         X_angle=atof(argv[3]);
         Z_angle=atof(argv[4]);
         scale_mult=atof(argv[5]);
-        Paab=atof(argv[6]);
-        Paac=atof(argv[7]);
-        Paad=atof(argv[8]);
-        Pacd=atof(argv[9]);
-        Pba=atof(argv[10]);
-        Pbc=atof(argv[11]);
-        Pbd=atof(argv[12]);
-        Win[0] = atoi(argv[13]);
-        Win[1] = atoi(argv[14]);
+        Paaa=atof(argv[6]);
+        Paab=atof(argv[7]);
+        Paac=atof(argv[8]);
+        Paad=atof(argv[9]);
+        Pacd=atof(argv[10]);
+        Pba=atof(argv[11]);
+        Pbc=atof(argv[12]);
+        Pbd=atof(argv[13]);
+        Win[0] = atoi(argv[14]);
+        Win[1] = atoi(argv[15]);
 
         // Enforce bounds on input variables
         if (n_plants>=MAX_PLANTS) n_plants=MAX_PLANTS;
@@ -1281,6 +1343,23 @@ unsigned char *readPPM(const char *name, int *sx, int *sy)
  free(tmp);
  return(im);
 }
+
+/*
+  helper functions
+*/
+void LeafStem(void){
+  GLUquadric *quadObject;
+  quadObject=gluNewQuadric();
+
+  gluCylinder(quadObject,.03,.02,0.5,10,10);
+
+  // Destroy our quadrics object
+  gluDeleteQuadric(quadObject);
+
+
+}
+
+
 
 void MouseClick(int button, int state, int x, int y) {
     ImGui_ImplGlut_MouseButtonCallback(button, state, x, y);
