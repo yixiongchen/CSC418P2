@@ -388,12 +388,14 @@ void RenderPlant(struct PlantNode *p)
  //parent node
  if(p->type =='a' || p->type == 'b'){
   //x, z angle
-
+ 
 
   //scale vector
 
 
   StemSection();
+  //translate;
+
  }
  if(p->type == 'c'){
   //x, z angle
@@ -404,6 +406,7 @@ void RenderPlant(struct PlantNode *p)
   
   LeafSection();
  }
+
  if(p->type == 'd'){
   //x, z angle
 
@@ -493,17 +496,17 @@ void LeafSection(void)
  ///////////////////////////////////////////////////////////
  // DO YOUR DRAWING WORK HERE!!!!
  ///////////////////////////////////////////////////////////
-         glBegin(GL_TRIANGLES); 
-          glNormal3f(-0.1, 0, 0.25); 
-          glVertex3f(0, 0, 0); 
-          glVertex3f(0.25, 0.25, 0.1); 
-          glVertex3f(0, 0.5, 0); 
+   glBegin(GL_TRIANGLES); 
+    glNormal3f(-0.1, 0, 0.25); 
+    glVertex3f(0, 0, 0); 
+    glVertex3f(0.25, 0.25, 0.1); 
+    glVertex3f(0, 0.5, 0); 
 
-          glNormal3f(0.1, 0, 0.25); 
-          glVertex3f(0, 0, 0); 
-          glVertex3f(0, 0.5, 0); 
-          glVertex3f(-0.25, 0.25, 0.1); 
-        glEnd(); 
+    glNormal3f(0.1, 0, 0.25); 
+    glVertex3f(0, 0, 0); 
+    glVertex3f(0, 0.5, 0); 
+    glVertex3f(-0.25, 0.25, 0.1); 
+  glEnd(); 
 
  // Disable texture mapping
  if (textures_on)
@@ -830,10 +833,12 @@ int main(int argc, char** argv)
         if (Z_angle>360) Z_angle=360;
         if (scale_mult<.75) scale_mult=.75;
         if (scale_mult>.99) scale_mult=.99;
-	Paab=Paab/(Paab+Paac+Paad+Pacd);
-	Paac=Paac/(Paab+Paac+Paad+Pacd);
-	Paad=Paad/(Paab+Paac+Paad+Pacd);
-	Pacd=Pacd/(Paab+Paac+Paad+Pacd);
+        Paaa = Paaa/(Paaa+Paab+Paac+Paad+Pacd);
+        Paab=Paab/(Paaa+Paab+Paac+Paad+Pacd);
+        Paac=Paac/(Paaa+Paab+Paac+Paad+Pacd);
+        Paad=Paad/(Paaa+Paab+Paac+Paad+Pacd);
+        Pacd=Pacd/(Paaa+Paab+Paac+Paad+Pacd);
+
         Pba=Pba/(Pba+Pbc+Pbd);
         Pbc=Pbc/(Pba+Pbc+Pbd);
         Pbd=Pbd/(Pba+Pbc+Pbd);
