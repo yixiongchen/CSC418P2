@@ -388,29 +388,30 @@ void RenderPlant(struct PlantNode *p)
  //parent node
  if(p->type =='a' || p->type == 'b'){
   //x, z angle
-
-
-  //scale vector
-
-
+ glRotatef(p->z_ang, 0, 0, 1);
+ glRotatef(p->x_ang, 1, 0, 0);
+ //scale vector
+ glScalef(p->scl, p->scl, p->scl);
   StemSection();
+  glTranslatef(0, 0, 1);
  }
  if(p->type == 'c'){
   //x, z angle
-
+  glRotatef(p->z_ang, 0, 0, 1);
+  glRotatef(p->x_ang, 1, 0, 0);
 
   //scale vector
-
-  
+   glScalef(p->scl, p->scl, p->scl);
   LeafSection();
  }
  if(p->type == 'd'){
   //x, z angle
-
+  glRotatef(p->z_ang, 0, 0, 1);
+  glRotatef(p->x_ang, 1, 0, 0);
 
   //scale vector
+   glScalef(p->scl, p->scl, p->scl);
 
-  
   FlowerSection();
  }
  //right node
