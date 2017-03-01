@@ -147,6 +147,7 @@ void StemSection();
 void LeafStem();
 void LeafSection();
 void FlowerSection();
+void FlowerStem();
 void AnimatedRenderPlant(void);
 
 // Surface generation
@@ -218,9 +219,9 @@ void RenderSurfaceGrid(void)
  /////////////////////////////////////////////////////////////////////////
   int i, j;
 
-  float r = 0.9;
-  float g = 0.84;
-  float b = 0.4;
+  float r = 0.3;
+  float g = 0.15;
+  float b = 0;
   for(i=0; i<GRID_RESOLVE-1; i++){
     for(j=0; j<GRID_RESOLVE-1; j++){
       glBegin(GL_QUADS); // 2x2 pixels
@@ -383,9 +384,6 @@ void RenderPlant(struct PlantNode *p)
 
  if (p==NULL) return;		// Avoid crash if called with empty node
 
- //left children node
- RenderPlant(p->left);
-
  //parent node
  if(p->type =='a' || p->type == 'b'){
   //x, z angle
@@ -393,8 +391,11 @@ void RenderPlant(struct PlantNode *p)
   glRotatef(p->x_ang, 1, 0, 0);
   //scale vector
   glScalef(p->scl, p->scl, p->scl);
+
   StemSection();
+  //tranformation for children nodes
   glTranslatef(0, 0, 1);
+  
  }
 
  if(p->type == 'c'){
@@ -414,10 +415,19 @@ void RenderPlant(struct PlantNode *p)
 
   //scale vector
   glScalef(p->scl, p->scl, p->scl);
+  FlowerStem();
+  glColor3f(p->f_c_R, p->f_c_G, p->f_c_B);
   FlowerSection();
  }
+
+//left children node
+ glPushMatrix();
+ RenderPlant(p->left);
+ glPopMatrix();
  //right children node
+ glPushMatrix();
  RenderPlant(p->right);
+ glPopMatrix();
 }
 
 void StemSection(void)
@@ -429,7 +439,7 @@ void StemSection(void)
   // Create a quadrics object to make the stem 
   GLUquadric *quadObject;
   quadObject=gluNewQuadric();
-
+  glColor3f(.5,.5,.3);
   gluCylinder(quadObject,.05,.04,1,10,10);
 
   // Destroy our quadrics object
@@ -440,10 +450,10 @@ void LeafSection(void)
 {
  // Draws a single leaf, along the current local Z axis
  // Note that we draw a little stem before the actual leaf.
- glColor3f(.25,1,.1);
+ 
  LeafStem();
  // Perhaps you should translate now? :)
- glTranslatef(0,0,0.5);
+ glTranslatef(0,0,0.3);
  ////////////////////////////////////////////////////////////
  // TO DO: Draw your own leaf design.
  //        It should be aligned with the current Z
@@ -496,79 +506,87 @@ void LeafSection(void)
  ///////////////////////////////////////////////////////////
  // DO YOUR DRAWING WORK HERE!!!!
  ///////////////////////////////////////////////////////////
-
  //compute normal for each vertex
- GL_FLOAT leafvertex[7][3];
- GL_FLOAT leafnormal[7][3];
+ GLfloat leafvertex[7][3];
+ GLfloat leafnormal[7][3];
  double vx,vy,vz,wx,wy,wz;
- int flag;
+ int flag0, flag1;
  //vertex 0
  leafvertex[0][0] = -0.25;
  leafvertex[0][1] = 0;
  leafvertex[0][2] = 0;
  //vertex 1
- leafvertex[0][0] = -0.3;
- leafvertex[0][1] = 0;
- leafvertex[0][2] = 0.3;
+ leafvertex[1][0] = -0.3;
+ leafvertex[1][1] = 0;
+ leafvertex[1][2] = 0.3;
   //vertex 2
- leafvertex[0][0] = -0.2;
- leafvertex[0][1] = 0;
- leafvertex[0][2] = 0.2;
+ leafvertex[2][0] = -0.2;
+ leafvertex[2][1] = 0;
+ leafvertex[2][2] = 0.2;
   //vertex 3
- leafvertex[0][0] = 0;
- leafvertex[0][1] = 0;
- leafvertex[0][2] = 0.55;
+ leafvertex[3][0] = 0;
+ leafvertex[3][1] = 0;
+ leafvertex[3][2] = 0.55;
   //vertex 4
- leafvertex[0][0] = 0.2;
- leafvertex[0][1] = 0;
- leafvertex[0][2] = 0.2;
+ leafvertex[4][0] = 0.2;
+ leafvertex[4][1] = 0;
+ leafvertex[4][2] = 0.2;
   //vertex 5
- leafvertex[0][0] = 0.3;
- leafvertex[0][1] = 0;
- leafvertex[0][2] = 0.3;
+ leafvertex[5][0] = 0.3;
+ leafvertex[5][1] = 0;
+ leafvertex[5][2] = 0.3;
   //vertex 6
- leafvertex[0][0] = -0.25;
- leafvertex[0][1] = 0;
- leafvertex[0][2] = 0;
+ leafvertex[6][0] = 0.25;
+ leafvertex[6][1] = 0;
+ leafvertex[6][2] = 0;
 
- flag = 0;
+
  for(int i=0; i<7; i++){
+  flag0 = 0;
+  flag1 = 0;
   if( i == 0){
-    flag = 7;
+    flag0 = 7;
   }
   if( i == 6){
-    flag = -7;
+    flag1 = -7;
   }
-  wx = leafvertex[i-1+flag][0] - leafvertex[i][0];
-  wy = leafvertex[i-1+flag][0] - leafvertex[i][0];
-  wz = leafvertex[i-1+flag][0] - leafvertex[i][0];
-  vx = leafvertex[i+1+flag][0] - leafvertex[i][0];
-  vy = leafvertex[i+1+flag][0] - leafvertex[i][0];
-  vz = leafvertex[i+1+flag][0] - leafvertex[i][0];
+  wx = leafvertex[i-1+flag0][0] - leafvertex[i][0];
+  wy = leafvertex[i-1+flag0][1] - leafvertex[i][1];
+  wz = leafvertex[i-1+flag0][2] - leafvertex[i][2];
+  vx = leafvertex[i+1+flag1][0] - leafvertex[i][0];
+  vy = leafvertex[i+1+flag1][1] - leafvertex[i][1];
+  vz = leafvertex[i+1+flag1][2] - leafvertex[i][2];
   computeNormal(&vx,&vy,&vz,wx,wy,wz);
   leafnormal[i][0]= vx;
   leafnormal[i][1]= vy;
   leafnormal[i][2]= vz;
  }
    //draw leaf and specify normals
-   glBegin(GL_TRIANGLES); 
+  
+   glBegin(GL_POLYGON); 
+    glColor3f(.25,1,.1);
     glNormal3f(leafnormal[0][0],leafnormal[0][1],leafnormal[0][2]); 
-    glVertex3f(-0.25, 0, 0); 
+    glVertex3f(leafvertex[0][0],leafvertex[0][1],leafvertex[0][2]); 
+    
     glNormal3f(leafnormal[1][0],leafnormal[1][1],leafnormal[1][2]);
-    glVertex3f(-0.3, 0, 0.3); 
+    glVertex3f(leafvertex[1][0],leafvertex[1][1],leafvertex[1][2]); 
+
     glNormal3f(leafnormal[2][0],leafnormal[2][1],leafnormal[2][2]);
-    glVertex3f(-0.2, 0, 0.2); 
+    glVertex3f(leafvertex[2][0],leafvertex[2][1],leafvertex[2][2]); 
+
     glNormal3f(leafnormal[3][0],leafnormal[3][1],leafnormal[3][2]);
-    glVertex3f(0, 0, 0.55);
+    glVertex3f(leafvertex[3][0],leafvertex[3][1],leafvertex[3][2]);
+
     glNormal3f(leafnormal[4][0],leafnormal[4][1],leafnormal[4][2]);
-    glVertex3f(0.2, 0, 0.2);
+    glVertex3f(leafvertex[4][0],leafvertex[4][1],leafvertex[4][2]);
+
     glNormal3f(leafnormal[5][0],leafnormal[5][1],leafnormal[5][2]);
-    glVertex3f(0.3, 0, 0.3);
+    glVertex3f(leafvertex[5][0],leafvertex[5][1],leafvertex[5][2]);
+
     glNormal3f(leafnormal[6][0],leafnormal[6][1],leafnormal[6][2]);
-    glVertex3f(0.25, 0, 0);
+    glVertex3f(leafvertex[6][0],leafvertex[6][1],leafvertex[6][2]);
   glEnd(); 
 
-  
  // Disable texture mapping
  if (textures_on)
  {
@@ -578,6 +596,8 @@ void LeafSection(void)
  }
 
 }
+
+
 
 void FlowerSection()
 {
@@ -623,6 +643,58 @@ void FlowerSection()
  /////////////////////////////////////////////////////////////
  // DO YOUR DRAWING WORK HERE!!
  /////////////////////////////////////////////////////////////
+float theta;
+float x_coord;
+float y_coord;
+int flag0;
+int flag1;
+double wx,wy,wz,vx,vy,vz;
+GLfloat flower_vetex[360][3];
+GLfloat flower_normal[360][3];
+
+//compute a rose
+for(int i = 0; i<360; i++){
+  theta  = ((float)i/360) * 2 * PI;
+  x_coord = 0.3*sin(5*theta)*cos(3*theta);
+  y_coord = 0.3*sin(5*theta)*sin(3*theta); 
+  flower_vetex[i][0] = x_coord;
+  flower_vetex[i][1] = y_coord;
+  flower_vetex[i][2] = 0;
+}
+//compute each normal vector
+for(int i = 0; i <360; i++){
+  flag0 = 0;
+  flag1 = 0;
+  if(i == 0){
+    flag0 = 360;
+  }
+  if(i == 359){
+    flag1 = -360;
+  } 
+  wx = flower_vetex[i-1+flag0][0] - flower_vetex[i][0];
+  wy = flower_vetex[i-1+flag0][1] - flower_vetex[i][1];
+  wz = flower_vetex[i-1+flag0][2] - flower_vetex[i][2];
+  vx = flower_vetex[i+1+flag1][0] - flower_vetex[i][0];
+  vy = flower_vetex[i+1+flag1][1] - flower_vetex[i][1];
+  vz = flower_vetex[i+1+flag1][2] - flower_vetex[i][2];
+  computeNormal(&vx,&vy,&vz,wx,wy,wz);
+  flower_normal[i][0]= vx;
+  flower_normal[i][1]= vy;
+  flower_normal[i][2]= vz;
+}
+
+// draw flow stem first
+
+
+glBegin(GL_POLYGON); 
+    for(int i=0; i<360; i++){
+      //specify normal vector
+      glNormal3f(flower_normal[i][0], flower_normal[i][1],flower_normal[i][2]);
+      glVertex3f(flower_vetex[i][0], flower_vetex[i][1], flower_vetex[i][2]);
+    }
+glEnd();
+
+
 
  // Disable texture mapping
  if (textures_on)
@@ -632,6 +704,8 @@ void FlowerSection()
   glDisable (GL_BLEND);
  }
 }
+
+
 
 void FreePlant(struct PlantNode *p)
 {
@@ -773,13 +847,20 @@ void GenerateRecursivePlant(struct PlantNode *p, int level)
     q->x_ang = drand48()*X_angle;
     q->z_ang = drand48()*Z_angle;
     q->scl = scale_mult;
+    q->f_c_R = drand48()*1;
+    q->f_c_G = drand48()*1;
+    q->f_c_B = drand48()*1;
     q->left = NULL;
     q->right = NULL;
+
     // Generate a single node for right
     r=(struct PlantNode *)calloc(1,sizeof(struct PlantNode));
     r->x_ang = drand48()*X_angle;
     r->z_ang = drand48()*Z_angle;
     r->scl = scale_mult;
+    r->f_c_R = drand48()*1;
+    r->f_c_G = drand48()*1;
+    r->f_c_B = drand48()*1;
     r->left = NULL;
     r->right = NULL;
 
@@ -864,7 +945,7 @@ int main(int argc, char** argv)
  */
 
     // Process program arguments
-    if(argc != 15) {
+    if(argc != 16) {
         printf("Usage: PlantLife n_plants n_levels X_angle Z_angle scale_mult Paaa Paab Paac Paad Pacd Pba Pbc Pbd width height\n");
         exit(1);
     } else {
@@ -895,7 +976,7 @@ int main(int argc, char** argv)
         if (Z_angle>360) Z_angle=360;
         if (scale_mult<.75) scale_mult=.75;
         if (scale_mult>.99) scale_mult=.99;
-        Paaa = Paaa/(Paaa+Paab+Paac+Paad+Pacd);
+        Paaa=Paaa/(Paaa+Paab+Paac+Paad+Pacd);
         Paab=Paab/(Paaa+Paab+Paac+Paad+Pacd);
         Paac=Paac/(Paaa+Paab+Paac+Paad+Pacd);
         Paad=Paad/(Paaa+Paab+Paac+Paad+Pacd);
@@ -955,6 +1036,7 @@ int main(int argc, char** argv)
     // Make a plant forest!
     for (int i=0;i<n_plants;i++){
      PlantForest[i]=MakePlant();
+     PrintPlant(PlantForest[i]);
 
     //////////////////////////////////////////////////////////////
     // TO DO: Set the locations of the plants in the plant forest
@@ -1350,15 +1432,19 @@ unsigned char *readPPM(const char *name, int *sx, int *sy)
 void LeafStem(void){
   GLUquadric *quadObject;
   quadObject=gluNewQuadric();
-
-  gluCylinder(quadObject,.03,.02,0.5,10,10);
-
-  // Destroy our quadrics object
+  glColor3f(.25,1,.1);
+  gluCylinder(quadObject,.01,.01,0.3,10,10);
   gluDeleteQuadric(quadObject);
-
-
 }
 
+void FlowerStem(void){
+  GLUquadric *quadObject;
+  quadObject=gluNewQuadric();
+  glColor3f(1,0,0);
+  gluCylinder(quadObject,.01,.01,1,10,10);
+  gluDeleteQuadric(quadObject);
+  glTranslatef(0, 0, 1);
+}
 
 
 void MouseClick(int button, int state, int x, int y) {
